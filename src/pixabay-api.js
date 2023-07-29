@@ -15,10 +15,9 @@ import axios from 'axios';
     });
      
      return axios.get(`${BASE_URL}?${searchParams}`)
-     .then(response => response.data)
-        .catch(error => {
-            console.log("Sorry, there are no images matching your search query. Please try again.", error);
-            return [];
-        });
+         .then(response => response.data)
+         .catch(error => {
+             console.log("Sorry, there are no images matching your search query. Please try again.", error);
+             return [];
+         })
 }
-

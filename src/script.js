@@ -11,6 +11,9 @@ function handlerSearch(evt) {
     const { searchQuery } = evt.currentTarget.elements;
     console.log(searchQuery);
 
-    serviceSearchImg(searchQuery.value)
+    serviceSearchImg(searchQuery.value);
 }
 
+function createMarkup(arr) {
+    return arr.map().join('')
+}
