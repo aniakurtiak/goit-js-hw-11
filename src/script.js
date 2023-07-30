@@ -1,18 +1,65 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { serviceSearchImg } from "./pixabay-api";
 
+
 const form = document.querySelector('.search-form');
 const gallery = document.querySelector('.gallery');
+const loadMoreBtn = document.querySelector('.load-more');
 
-form.addEventListener('submit', handlerSearch)
+let currentPage = 1;
+let currentSearchQuery = '';
 
-function handlerSearch(evt) {
+form.addEventListener('submit', handlerSearch);
+loadMoreBtn.addEventListener('click', handleLoadMore);
+
+async function handlerSearch(evt) {
     evt.preventDefault()
     const { searchQuery } = evt.currentTarget.elements;
+     if (currentSearchQuery !== searchQuery.value) {
+    currentSearchQuery = searchQuery.value;
+    gallery.innerHTML = '';
+    currentPage = 1;
+  }
+    try {
+    const data = await serviceSearchImg(currentSearchQuery, currentPage);
+    if (data.totalHits > 0) {
+      gallery.innerHTML += createMarkup(data.hits);
+      currentPage++;
+      if (data.totalHits > currentPage * 40) {
+        loadMoreBtn.style.display = 'block';
+      } else {
+        loadMoreBtn.style.display = 'none';
+        Notify.failure("We're sorry, but you've reached the end of search results.");
+      }
+    } else {
+      Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+    }
+  } catch (error) {
+    console.log("Error handling search:", error);
+    Notify.failure('Sorry, there was an error handling the search. Please try again.');
+  }
+}
 
-    serviceSearchImg(searchQuery.value)
-        .then(data => gallery.innerHTML = createMarkup(data.hits))
-        .catch(error => console.log(error))
+async function handleLoadMore() {
+  loadMoreBtn.style.display = 'none';
+  try {
+    const data = await serviceSearchImg(currentSearchQuery, currentPage);
+    if (data.totalHits > 0) {
+      gallery.innerHTML += createMarkup(data.hits);
+      currentPage++;
+      if (data.totalHits > currentPage * 40) {
+        loadMoreBtn.style.display = 'block';
+      } else {
+        loadMoreBtn.style.display = 'none';
+        Notify.failure("We're sorry, but you've reached the end of search results.");
+      }
+    } else {
+      Notify.failure("We're sorry, but you've reached the end of search results.");
+    }
+  } catch (error) {
+    console.log("Error handling load more:", error);
+    Notify.failure('Sorry, there was an error loading more images. Please try again.');
+  }
 }
 
 function createMarkup(arr) {
